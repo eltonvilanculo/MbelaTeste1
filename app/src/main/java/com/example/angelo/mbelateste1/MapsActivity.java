@@ -43,10 +43,12 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.Polyline;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback , LocationListener{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback , LocationListener , GoogleMap.OnPolygonClickListener , GoogleMap.OnPolylineClickListener{
 
     private GoogleMap mMap;
     private DrawerLayout mDrawerLayout;
@@ -59,16 +61,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setupToolBar();
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
         setupNavigationView();
         startGettingLocations();
 
@@ -95,6 +98,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-25.953724, 32.588711);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Motorista disponivel"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        Marker melbourne = mMap.addMarker(new MarkerOptions()
+                .position(sydney)
+                .title("Angêlo Massache")
+                .snippet("Condução: Defensiva\n" +
+                        "Humor : Sempre alegre" +
+                        "5 Anos de experiencia"));
+
     }
     public void setupToolBar(){
 
@@ -270,5 +281,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         return result;
+    }
+
+    @Override
+    public void onPolygonClick(Polygon polygon) {
+
+    }
+
+    @Override
+    public void onPolylineClick(Polyline polyline) {
+
     }
 }
