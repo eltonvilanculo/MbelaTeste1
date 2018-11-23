@@ -31,6 +31,18 @@
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    map:cameraBearing="112.5"
+    map:cameraTilt="30"
+    map:cameraZoom="13"
+    map:mapType="hybrid"
+    map:uiCompass="true"
+    map:uiRotateGestures="true"
+    map:uiScrollGestures="true"
+    map:uiTiltGestures="true"
+    map:uiZoomControls="true"
+    map:uiZoomGestures="true"
+
+
     tools:context="com.example.angelo.mbelateste1.MapsActivity" />
 
     <android.support.design.widget.NavigationView

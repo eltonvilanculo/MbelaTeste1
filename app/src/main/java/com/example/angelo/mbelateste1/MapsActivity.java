@@ -58,6 +58,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,7 +135,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         marker = mMap.addMarker(markerOptions);
 
-        CameraPosition cameraPosition = new CameraPosition.Builder().zoom(30).target(latLng).build();
+        CameraPosition cameraPosition = new CameraPosition.Builder().zoom(15).target(latLng).build();
 
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         Toast.makeText(MapsActivity.this, "Você está aqui", Toast.LENGTH_SHORT).show();
