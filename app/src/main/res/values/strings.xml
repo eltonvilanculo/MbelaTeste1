@@ -87,4 +87,29 @@
     <string name="title_activity_maps">Menu Principal</string>
     <string name="drawer_open">open</string>
     <string name="drawer_close">close</string>
+    <string name="teste_sms">teste de sms</string>
+    <string name="hint_numero">Numero de telefone</string>
+    <string name="hint_codigo">Codigo de verificacao</string>
+
+    <!-- Novas Strings -->
+    <string name="textoPrincipal">O SLOGAN DA CENA</string>
+    <string name="login">Login</string>
+    <string name="cadastro">Registrar-se</string>
+    <string name="asknumber">Qual é o número do seu celular?</string>
+    <string name="info">Enviaremos um código para verificar o seu número </string>
+    <string name="recovery">Já possui uma conta. Deseja recuperá-la?</string>
+    <string name="askcode">Qual é o código?</string>
+
+
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sent_to">Enviado para +258841234567</string>
+    <string name="reenviar_codigo">Reenviar código</string>
+
+
+
+
+
+
 </resources>

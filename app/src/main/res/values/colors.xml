@@ -6,4 +6,11 @@
     <color name="grey_100">#F5F5F5</color>
     <color name="grey_300">#E0E0E0</color>
     <color name="grey_500">#9E9E9E</color>
+    <color name="sky">#80cad4</color>
+    <color name = "primaryDark"> #292b3d </color>
+    <color name="lightGrey">#efeaea</color>
+    <color name="startblue">#09c6df</color>
+    <color name="endblue">#a6cdd2</color>
+    <color name="manter">#0bcce6</color>
+
 </resources>
