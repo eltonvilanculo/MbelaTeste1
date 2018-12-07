@@ -46,7 +46,7 @@ public class MainFrag extends Fragment {
                 getActivity().
                         getSupportFragmentManager().
                         beginTransaction().
-                        replace(R.id.container, new Registro())
+                        replace(R.id.container, new motoristaFragment())
                         .commit();
             }
         });

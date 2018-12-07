@@ -101,15 +101,10 @@
     <string name="askcode">Qual é o código?</string>
 
 
-
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sent_to">Enviado para +258841234567</string>
     <string name="reenviar_codigo">Reenviar código</string>
-
-
-
-
 
 
 </resources>
