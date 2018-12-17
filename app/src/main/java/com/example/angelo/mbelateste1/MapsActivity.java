@@ -1,295 +1,352 @@
 package com.example.angelo.mbelateste1;
 
-import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-
-
-
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Build;
-import android.provider.Settings;
-import  android.support.design.widget.NavigationView;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polygon;
-import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback , LocationListener , GoogleMap.OnPolygonClickListener , GoogleMap.OnPolylineClickListener{
+//import com.google.android.gms.common.api.;
 
-    private GoogleMap mMap;
+
+
+public class MapsActivity extends FragmentActivity implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback,GoogleApiClient.OnConnectionFailedListener,HistoricoFragment.OnFragmentInteractionListener {
+
+    private static final String TAG = "MapsActivity";
+
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final float DEFAULT_ZOOM = 15f;
+
+    private static final LatLngBounds LAT_LNG_BOUNDS =new LatLngBounds(
+            new LatLng(-40,-168), new LatLng(71,136));
+
+
+
+    //widget
+    private AutoCompleteTextView mSearchText;
+   // private TextView mSearchText;
+    private ImageView mGps;
     private DrawerLayout mDrawerLayout;
-    private android.support.v7.widget.Toolbar mToolBar;
+    private ImageView mPerfilFoto;
 
-    // Location
-    Marker marker;
-    LatLng latLng;
-
-
+    //vars
+    private Boolean mLocationPermissionGranted = false;
+    private GoogleMap mMap;
+    private FusedLocationProviderClient mFusedLocationProviderClient; // Voce me deu Problemas
+  //  private PlaceAutocompleteAdapter mPlaceAutocompleteAdapter; //Adapter
+   // private GoogleApiClient mGoogleApiClient;
 
 
     @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        setupToolBar();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        mSearchText= (AutoCompleteTextView)findViewById(R.id.input_search);
+        mGps= (ImageView) findViewById(R.id.ic_gps);
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mPerfilFoto=(ImageView) findViewById(R.id.perfil_foto) ;
+
+        // Crindo circunferencia na foto de perfil
+       // Bitmap bitmap=new BitmapFactory.decodeResource(getResources(),R.drawable.stlsm);
+
+        // Nevegation Drawer
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+                        int id = menuItem.getItemId();
+
+                        if (id == R.id.nav_home) {
+                            Toast.makeText(MapsActivity.this, "Home", Toast.LENGTH_SHORT).show();
+                        } else if (id == R.id.nav_termos_de_uso) {
+                            Toast.makeText(MapsActivity.this, "Termos de Uso", Toast.LENGTH_SHORT).show();
+                        } else if (id == R.id.nav_definicoes) {
+                            Toast.makeText(MapsActivity.this, "Definicoes", Toast.LENGTH_SHORT).show();
+                        } else if (id == R.id.nav_promocao) {
+                            Toast.makeText(MapsActivity.this, "Promocao", Toast.LENGTH_SHORT).show();
+                        } else if (id == R.id.nav_pagamento) {
+                            Toast.makeText(MapsActivity.this, "Pagamento", Toast.LENGTH_SHORT).show();
+                        } else if (id == R.id.nav_feedback) {
+                            Toast.makeText(MapsActivity.this, "Feedback", Toast.LENGTH_SHORT).show();
+                        } else if (id == R.id.nav_historico) {
+                            HistoricoFragment historicoFragment=new HistoricoFragment();
+                            FragmentManager fragmentManager=getSupportFragmentManager();
+                            fragmentManager.beginTransaction().replace(R.id.main_layout,historicoFragment).commit();
+                            Toast.makeText(MapsActivity.this, "Historico", Toast.LENGTH_SHORT).show();
+                        }
+
+                        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                        drawer.closeDrawer(GravityCompat.START);
+                        return true;
+                    }
+                });
+
+
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        setupNavigationView();
-        startGettingLocations();
-
+        getLocationPermission();
 
     }
 
+private void init(){
+    Log.d(TAG, "init: inicializando Search");
 
 
+//    mGoogleApiClient = new GoogleApiClient
+//            .Builder(this)
+//            .addApi(Places.GEO_DATA_API)
+//            .addApi(Places.PLACE_DETECTION_API)
+//            .enableAutoManage(this, this)
+//            .build();
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+   // mPlaceAutocompleteAdapter = new PlaceAutocompleteAdapter(this,mGoogleApiClient,LAT_LNG_BOUNDS,null);
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-25.953724, 32.588711);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Motorista disponivel"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
-        Marker melbourne = mMap.addMarker(new MarkerOptions()
-                .position(sydney)
-                .title("Angêlo Massache")
-                .snippet("Condução: Defensiva\n" +
-                        "Humor : Sempre alegre" +
-                        "5 Anos de experiencia"));
+    //mSearchText.setAdapter(mPlaceAutocompleteAdapter);
 
-    }
-    public void setupToolBar(){
+    // Fazendo a alteracao do Enter para fazer search
+    mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId==EditorInfo.IME_ACTION_SEARCH
+                    || actionId==EditorInfo.IME_ACTION_DONE
+                    || event.getAction()==event.ACTION_DOWN
+                    || event.getAction()==event.KEYCODE_ENTER) {
+                // Execucao do metodo para pesquisa
+                geoLocate();
+                Toast.makeText(MapsActivity.this, "Pesquisa", Toast.LENGTH_SHORT).show();
+            }
+            return false;
+        }
+    });
 
-        mToolBar = (android.support.v7.widget.Toolbar) findViewById(R.id.mtoolBar_id);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mToolBar.setTitle("Mbela Mova");
+    mGps.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG, "onClick: icone do gps pressionado");
+            getDeviceLocation();
+            Toast.makeText(MapsActivity.this, "Chefe estou aqui", Toast.LENGTH_SHORT).show();
+        }
+    });
+    //hideSoftKeyboard();
+}
+
+    private void geoLocate() {
+        Log.d(TAG, "geoLocate: Localizacao Geografica");
+        String searchString=mSearchText.getText().toString();
+
+        Geocoder geocoder=new Geocoder(MapsActivity.this);
+        List<Address> list=new ArrayList<>();
+
+        try {
+            list=geocoder.getFromLocationName(searchString,1);
+
+        }catch (IOException e){
+            Log.d(TAG, "geoLocate: IOException"+e.getMessage());
+
         }
 
-    }
+        if (list.size()>0){
+        Address address=list.get(0); // Localizacao pesquisada
+            Log.d(TAG, "geoLocate: Localizacao Localizada "+address.toString());
+            Toast.makeText(this, "Localizacao Localizada "+address.toString(), Toast.LENGTH_SHORT).show();
+            moveCamera(new LatLng(address.getLatitude(),address.getLongitude()),DEFAULT_ZOOM,address.getAddressLine(0));
 
-    public  void setupNavigationView(){
-        NavigationView navigationView = (NavigationView) findViewById(R.id.navigation_view_id);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerlayout_layout_id);
-        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(MapsActivity.this,mDrawerLayout,mToolBar,R.string.drawer_open,R.string.drawer_close);
-        View headerView = navigationView.getHeaderView(0);
-        //TextView user_name_header = headerView.findViewById(R.id.text_view_userName);
-        //user_name_header.setText(LoginActiviry.getLoggedUser());
-        //Link entre o drawerTogggle e o NavigationView
-
-        mDrawerLayout.addDrawerListener(actionBarDrawerToggle);
-        actionBarDrawerToggle.syncState();
-        //Para listener
-        //navigationView.setNavigationItemSelectedListener(this);
-    }
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-        if (marker!=null){
-            marker.remove();
         }
-        //Adicionar marker
-        latLng = new LatLng(location.getLatitude(),location.getLongitude());
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("Sua localização");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        marker = mMap.addMarker(markerOptions);
+    }
 
-        CameraPosition cameraPosition = new CameraPosition.Builder().zoom(15).target(latLng).build();
+    private void getDeviceLocation() {
+        Log.d(TAG, "getDeviceLocation: Buscando a localizacao Actual");
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        try {
+            if (mLocationPermissionGranted) {
+                Task location = mFusedLocationProviderClient.getLastLocation();
 
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        Toast.makeText(MapsActivity.this, "Você está aqui", Toast.LENGTH_SHORT).show();
+                ((Task) location).addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "onComplete: Localizacao encontrada");
+                            Location currentLocation = (Location) task.getResult();
+                            if (currentLocation != null) {
+                                moveCamera(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), DEFAULT_ZOOM,"My location");
+                            }
+
+                        } else {
+                            Log.d(TAG, "onComplete: Local actual nulo");
+                            Toast.makeText(MapsActivity.this, "Nao foi possivel carregar a localizacao actual", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e) {
+            Log.d(TAG, "getDeviceLocation: Excepcao de Seguranca" + e.getMessage());
+        }
+    }
 
 
+    private void moveCamera(LatLng latLng, float zoom,String title) {// mover a camera
+        Log.d(TAG, "moveCamera: movendo a camera para lattude:" + latLng.latitude + "longitude:" + latLng.longitude);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
 
+        //Opcoes de marcador
+            if (!title.equals("My location")){
 
+                MarkerOptions options=new MarkerOptions()
+                        .position(latLng)
+                        .title(title);
+                mMap.addMarker(options); // Adicionando o marcador ao mapa
+
+             }
+            // hideSoftKeyboard();
+    }
+
+    private void initMap() {// inicializar o mapa
+        Log.d(TAG, "initMap: inicializando o mapa");
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(MapsActivity.this);
 
     }
 
-    private void startGettingLocations() {
 
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    private void getLocationPermission() {
+        Log.d(TAG, "getLocationPermission: buscando permissao de localizacao");
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(), FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-        boolean isGPS = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean isNetwork = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        boolean canGetLocation = true;
-        int ALL_PERMISSIONS_RESULT = 101;
-        long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1;// Distance in meters
-        long MIN_TIME_BW_UPDATES =  10;// Time in milliseconds
-
-        ArrayList<String> permissions = new ArrayList<>();
-        ArrayList<String> permissionsToRequest;
-
-        permissions.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
-        permissionsToRequest = findUnAskedPermissions(permissions);
-
-
-        //Check if GPS and Network are on, if not asks the user to turn on
-        if (!isGPS && !isNetwork) {
-            showSettingsAlert();
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), COURSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionGranted = true;
+                initMap();
+            } else {
+                ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            }
         } else {
-            // check permissions
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
 
-            // check permissions for later versions
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (permissionsToRequest.size() > 0) {
-                    requestPermissions(permissionsToRequest.toArray(new String[permissionsToRequest.size()]),
-                            ALL_PERMISSIONS_RESULT);
-                    canGetLocation = false;
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < grantResults.length; i++) {
+                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionGranted = false;
+                            Log.d(TAG, "onRequestPermissionsResult: permissao falhou");
+                            return;
+                        }
+                    }
+                    mLocationPermissionGranted = true;
+                    Log.d(TAG, "onRequestPermissionsResult: permissao consedida");
+                    // Inicializa o mapa pois tudo esta bem
+                    initMap();
                 }
             }
         }
+    }
 
 
-        //Checks if FINE LOCATION and COARSE Location were granted
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
 
-            Toast.makeText(this, "Permissão negada", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        Toast.makeText(this, "Chefe o Mapa Esta Pronto", Toast.LENGTH_LONG).show();
+        // Add a marker in Maputo and move the camera
+//        LatLng mpt = new LatLng(-25.96553, 32.58322);
+//        mMap.addMarker(new MarkerOptions().position(mpt).title("Maputo"));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(mpt));
 
-        //Starts requesting location updates
-        if (canGetLocation) {
-            if (isGPS) {
-                lm.requestLocationUpdates(
-                        LocationManager.GPS_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
 
-            } else if (isNetwork) {
-                // from Network Provider
+        mMap = googleMap;
+        if (mLocationPermissionGranted) {
+            getDeviceLocation();
 
-                lm.requestLocationUpdates(
-                        LocationManager.NETWORK_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
-        } else {
-            Toast.makeText(this, "Não é possível obter a localização", Toast.LENGTH_SHORT).show();
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(false);// desabilitar localizacao My location
+
+            init();
+         // mMap.getUiSettings().
+
         }
     }
 
-    private boolean hasPermission(String permission) {
-        if (canAskPermission()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                return (checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED);
-            }
-        }
-        return true;
-    }
-    private boolean canAskPermission() {
-        return (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1);
-    }
-    public void showSettingsAlert() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-        alertDialog.setTitle("GPS desativado!");
-        alertDialog.setMessage("Ativar GPS?");
-        alertDialog.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        });
-
-        alertDialog.setNegativeButton("Não", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        alertDialog.show();
-    }
-
-
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Handle navigation view item clicks here.
+  return true;
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
+    public void onFragmentInteraction(Uri uri) {
 
     }
 
-    @Override
-    public void onProviderDisabled(String provider) {
 
-    }
-    private ArrayList findUnAskedPermissions(ArrayList<String> wanted) {
-        ArrayList result = new ArrayList();
-
-        for (String perm : wanted) {
-            if (!hasPermission(perm)) {
-                result.add(perm);
-            }
-        }
-
-        return result;
-    }
-
-    @Override
-    public void onPolygonClick(Polygon polygon) {
-
-    }
-
-    @Override
-    public void onPolylineClick(Polyline polyline) {
-
-    }
+//    private void hideSoftKeyboard(){
+//        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+//    }
 }

@@ -99,12 +99,16 @@
     <string name="info">Enviaremos um código para verificar o seu número </string>
     <string name="recovery">Já possui uma conta. Deseja recuperá-la?</string>
     <string name="askcode">Qual é o código?</string>
+    <string name="contactoText">Por favor insira o seu número de telemóvel de modo a receber o código de verificação.</string>
+    <string name="verificacaoText">Por favor insira o código de verificação para terminar a autenticação.</string>
+    <string name="not_received">Não recebi o código de verificação</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sent_to">Enviado para +258841234567</string>
     <string name="reenviar_codigo">Reenviar código</string>
+    <string name="string_historio">Historico de Viagem</string>
 
 
 </resources>

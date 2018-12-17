@@ -77,6 +77,7 @@ public class SmsVerifyActivity extends AppCompatActivity implements View.OnClick
         mPhoneNumberViews = findViewById(R.id.phoneAuthFields);
         mSignedInViews = findViewById(R.id.signedInButtons);
 
+
         mStatusText = findViewById(R.id.status);
         mDetailText = findViewById(R.id.detail);
         mVerificationField = findViewById(R.id.fieldVerificationCode);

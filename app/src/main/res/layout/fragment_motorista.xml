@@ -5,13 +5,13 @@
     tools:context="com.example.angelo.mbelateste1.motoristaFragment"
     android:orientation="vertical">
 
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:weightSum="1">
-
-        <!-- AQUI VAI FICAR O LOGO DA CENA -->
 
 
         <ImageView
@@ -21,6 +21,20 @@
             android:layout_height="200dp"
             android:id="@+id/btnGaleria"
             android:background="@drawable/ic_camera_black_24dp" />
+
+        <!-- *******************************Horizontal ScrollView ********************************** -->
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="80dp">
+
+            <LinearLayout
+                android:id="@+id/gallery"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+            </LinearLayout>
+
+        </HorizontalScrollView>
 
 
         <LinearLayout
